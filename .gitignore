@@ -1,0 +1,26 @@
+# Временные файлы компиляции Keil
+*.o
+*.d
+*.crf
+*.htm
+*.dep
+*.lnp
+*.lst
+*.map
+*.iex
+*.axf
+*.bin
+*.hex
+
+# Настройки пользователя Keil
+*.uvguix.*
+*.uvoptx
+
+# Логи и отладочные файлы
+JLinkLog.txt
+*.log
+
+# Папки, которые создаёт CubeMX
+MX_*
+/Debug-config/
+/Release-config/
