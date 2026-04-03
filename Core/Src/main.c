@@ -21,6 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <string.h>
 
 /* USER CODE END Includes */
 
@@ -55,6 +56,8 @@ UART_HandleTypeDef huart2;
 PCD_HandleTypeDef hpcd_USB_FS;
 
 /* USER CODE BEGIN PV */
+uint8_t rx_buffer[64];
+uint8_t rx_index = 0;
 
 /* USER CODE END PV */
 
@@ -116,7 +119,8 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USB_PCD_Init();
   /* USER CODE BEGIN 2 */
-
+	HAL_UART_Receive_IT(&huart1, &rx_buffer[rx_index], 1);
+	
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -600,7 +604,30 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+    if(huart->Instance == USART1) {
+        if(rx_buffer[rx_index] == '\r' || rx_buffer[rx_index] == '\n') {
+            rx_buffer[rx_index] = '\0';
+            
+            // Теперь можно сравнивать строки
+            if(strcmp((char*)rx_buffer, "status") == 0) {
+                char msg[] = "System OK\r\n";
+                HAL_UART_Transmit_IT(&huart1, (uint8_t*)msg, strlen(msg));
+            }
+            else if(strcmp((char*)rx_buffer, "help") == 0) {
+                char msg[] = "Commands: status, help\r\n";
+                HAL_UART_Transmit_IT(&huart1, (uint8_t*)msg, strlen(msg));
+            }
+            
+            rx_index = 0;
+        }
+        else {
+            rx_index++;
+            if(rx_index >= sizeof(rx_buffer)) rx_index = 0;
+        }
+        HAL_UART_Receive_IT(&huart1, &rx_buffer[rx_index], 1);
+    }
+}
 /* USER CODE END 4 */
 
 /**
